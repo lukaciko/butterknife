@@ -27,9 +27,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 final class BindingClass {
-  private static final ClassName FINDER = ClassName.get("butterknife", "ButterKnife", "Finder");
+  private static final ClassName FINDER = ClassName.get("butterknife.internal", "Util", "Finder");
   private static final ClassName VIEW_BINDER =
-      ClassName.get("butterknife", "ButterKnife", "ViewBinder");
+      ClassName.get("butterknife.internal", "Util", "ViewBinder");
   private static final int NO_ID = -1;
 
   private final Map<Integer, ViewBindings> viewIdMap = new LinkedHashMap<>();

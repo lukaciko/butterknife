@@ -1,10 +1,25 @@
 apply plugin: 'java'
 apply plugin: 'checkstyle'
 
+targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_7
+
+configurations {
+  provided {
+    dependencies.all { dep ->
+      configurations.default.exclude group: dep.group, module: dep.name
+    }
+  }
+  compile.extendsFrom provided
+}
+
 dependencies {
   compile project(':butterknife-annotations')
+//  compile project(':butterknife')
   compile 'com.google.auto.service:auto-service:1.0-rc2'
   compile 'com.squareup:javapoet:1.2.0'
+
+  provided 'com.google.android:android:4.1.1.4'
 
   testCompile deps.festandroid
   testCompile deps.festassert

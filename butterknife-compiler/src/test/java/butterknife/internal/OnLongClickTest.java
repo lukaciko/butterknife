@@ -5,6 +5,8 @@ import com.google.testing.compile.JavaFileObjects;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
 
+import butterknife.OnClick;
+
 import static com.google.common.truth.Truth.ASSERT;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 
@@ -25,11 +27,11 @@ public class OnLongClickTest {
         Joiner.on('\n').join(
             "package test;",
             "import android.view.View;",
-            "import butterknife.ButterKnife;",
+            "import butterknife.internal.Util;",
             "import java.lang.Object;",
             "import java.lang.Override;",
-            "public class Test$$ViewBinder<T extends Test> implements ButterKnife.ViewBinder<T> {",
-            "  @Override public void bind(final ButterKnife.Finder finder, final T target, Object source) {",
+            "public class Test$$ViewBinder<T extends Test> implements Util.ViewBinder<T> {",
+            "  @Override public void bind(final Util.Finder finder, final T target, Object source) {",
             "    View view;",
             "    view = finder.findRequiredView(source, 1, \"method 'doStuff'\");",
             "    view.setOnLongClickListener(new View.OnLongClickListener() {",

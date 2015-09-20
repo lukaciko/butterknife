@@ -6,6 +6,7 @@ import android.view.View;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.internal.Util;
 import butterknife.shadow.EditModeShadowView;
 import org.junit.After;
 import org.junit.Before;
@@ -15,8 +16,8 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static butterknife.ButterKnife.Finder.arrayOf;
-import static butterknife.ButterKnife.Finder.listOf;
+import static butterknife.internal.Util.Finder.listOf;
+import static butterknife.internal.Util.Finder.arrayOf;
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.entry;
@@ -148,7 +149,7 @@ public class ButterKnifeTest {
   @Test public void finderThrowsNiceError() {
     View view = new View(Robolectric.application);
     try {
-      ButterKnife.Finder.VIEW.findRequiredView(view, android.R.id.button1, "yo mama");
+      Util.Finder.VIEW.findRequiredView(view, android.R.id.button1, "yo mama");
       fail("View 'button1' with ID " + android.R.id.button1 + " should not have been found.");
     } catch (IllegalStateException e) {
       assertThat(e).hasMessage("Required view 'button1' with ID "
@@ -161,7 +162,7 @@ public class ButterKnifeTest {
   @Test public void finderThrowsLessNiceErrorInEditMode() {
     View view = new View(Robolectric.application);
     try {
-      ButterKnife.Finder.VIEW.findRequiredView(view, android.R.id.button1, "yo mama");
+      Util.Finder.VIEW.findRequiredView(view, android.R.id.button1, "yo mama");
       fail("View 'button1' with ID " + android.R.id.button1 + " should not have been found.");
     } catch (IllegalStateException e) {
       assertThat(e).hasMessage("Required view '<unavailable while editing>' "

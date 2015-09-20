@@ -17,6 +17,10 @@ android {
     versionCode 1
     versionName '1.0.0'
   }
+
+  packagingOptions {
+    exclude 'META-INF/services/javax.annotation.processing.Processor'
+  }
 }
 
 dependencies {

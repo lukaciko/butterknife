@@ -3,16 +3,16 @@ package butterknife;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import android.util.Property;
 import android.view.View;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import butterknife.internal.Util;
 
 /**
  * Field and method binding for Android views. Use this class to simplify finding views and
@@ -80,136 +80,6 @@ public final class ButterKnife {
     throw new AssertionError("No instances.");
   }
 
-  /** DO NOT USE: Exposed for generated code. */
-  @SuppressWarnings("UnusedDeclaration") // Used by generated code.
-  public enum Finder {
-    VIEW {
-      @Override protected View findView(Object source, int id) {
-        return ((View) source).findViewById(id);
-      }
-
-      @Override public Context getContext(Object source) {
-        return ((View) source).getContext();
-      }
-
-      @Override protected String getResourceEntryName(Object source, int id) {
-        final View view = (View) source;
-        // In edit mode, getResourceEntryName() is unsupported due to use of BridgeResources
-        if (view.isInEditMode()) {
-          return "<unavailable while editing>";
-        }
-        return super.getResourceEntryName(source, id);
-      }
-    },
-    ACTIVITY {
-      @Override protected View findView(Object source, int id) {
-        return ((Activity) source).findViewById(id);
-      }
-
-      @Override public Context getContext(Object source) {
-        return (Activity) source;
-      }
-    },
-    DIALOG {
-      @Override protected View findView(Object source, int id) {
-        return ((Dialog) source).findViewById(id);
-      }
-
-      @Override public Context getContext(Object source) {
-        return ((Dialog) source).getContext();
-      }
-    };
-
-    private static <T> T[] filterNull(T[] views) {
-      int end = 0;
-      for (int i = 0; i < views.length; i++) {
-        T view = views[i];
-        if (view != null) {
-          views[end++] = view;
-        }
-      }
-      return Arrays.copyOfRange(views, 0, end);
-    }
-
-    public static <T> T[] arrayOf(T... views) {
-      return filterNull(views);
-    }
-
-    public static <T> List<T> listOf(T... views) {
-      return new ImmutableList<>(filterNull(views));
-    }
-
-    public <T> T findRequiredView(Object source, int id, String who) {
-      T view = findOptionalView(source, id, who);
-      if (view == null) {
-        String name = getResourceEntryName(source, id);
-        throw new IllegalStateException("Required view '"
-            + name
-            + "' with ID "
-            + id
-            + " for "
-            + who
-            + " was not found. If this view is optional add '@Nullable' annotation.");
-      }
-      return view;
-    }
-
-    public <T> T findOptionalView(Object source, int id, String who) {
-      View view = findView(source, id);
-      return castView(view, id, who);
-    }
-
-    @SuppressWarnings("unchecked") // That's the point.
-    public <T> T castView(View view, int id, String who) {
-      try {
-        return (T) view;
-      } catch (ClassCastException e) {
-        if (who == null) {
-          throw new AssertionError();
-        }
-        String name = getResourceEntryName(view, id);
-        throw new IllegalStateException("View '"
-            + name
-            + "' with ID "
-            + id
-            + " for "
-            + who
-            + " was of the wrong type. See cause for more info.", e);
-      }
-    }
-
-    @SuppressWarnings("unchecked") // That's the point.
-    public <T> T castParam(Object value, String from, int fromPosition, String to, int toPosition) {
-      try {
-        return (T) value;
-      } catch (ClassCastException e) {
-        throw new IllegalStateException("Parameter #"
-            + (fromPosition + 1)
-            + " of method '"
-            + from
-            + "' was of the wrong type for parameter #"
-            + (toPosition + 1)
-            + " of method '"
-            + to
-            + "'. See cause for more info.", e);
-      }
-    }
-
-    protected String getResourceEntryName(Object source, int id) {
-      return getContext(source).getResources().getResourceEntryName(id);
-    }
-
-    protected abstract View findView(Object source, int id);
-
-    public abstract Context getContext(Object source);
-  }
-
-  /** DO NOT USE: Exposed for generated code. */
-  public interface ViewBinder<T> {
-    void bind(Finder finder, T target, Object source);
-    void unbind(T target);
-  }
-
   /** An action that can be applied to a list of views. */
   public interface Action<T extends View> {
     /** Apply the action on the {@code view} which is at {@code index} in the list. */
@@ -225,9 +95,9 @@ public final class ButterKnife {
   private static final String TAG = "ButterKnife";
   private static boolean debug = false;
 
-  static final Map<Class<?>, ViewBinder<Object>> BINDERS = new LinkedHashMap<>();
-  static final ViewBinder<Object> NOP_VIEW_BINDER = new ViewBinder<Object>() {
-    @Override public void bind(Finder finder, Object target, Object source) { }
+  static final Map<Class<?>, Util.ViewBinder<Object>> BINDERS = new LinkedHashMap<>();
+  static final Util.ViewBinder<Object> NOP_VIEW_BINDER = new Util.ViewBinder<Object>() {
+    @Override public void bind(Util.Finder finder, Object target, Object source) { }
     @Override public void unbind(Object target) { }
   };
 
@@ -243,7 +113,7 @@ public final class ButterKnife {
    * @param target Target activity for view binding.
    */
   public static void bind(Activity target) {
-    bind(target, target, Finder.ACTIVITY);
+    bind(target, target, Util.Finder.ACTIVITY);
   }
 
   /**
@@ -253,7 +123,7 @@ public final class ButterKnife {
    * @param target Target view for view binding.
    */
   public static void bind(View target) {
-    bind(target, target, Finder.VIEW);
+    bind(target, target, Util.Finder.VIEW);
   }
 
   /**
@@ -263,7 +133,7 @@ public final class ButterKnife {
    * @param target Target dialog for view binding.
    */
   public static void bind(Dialog target) {
-    bind(target, target, Finder.DIALOG);
+    bind(target, target, Util.Finder.DIALOG);
   }
 
   /**
@@ -274,7 +144,7 @@ public final class ButterKnife {
    * @param source Activity on which IDs will be looked up.
    */
   public static void bind(Object target, Activity source) {
-    bind(target, source, Finder.ACTIVITY);
+    bind(target, source, Util.Finder.ACTIVITY);
   }
 
   /**
@@ -285,7 +155,7 @@ public final class ButterKnife {
    * @param source View root on which IDs will be looked up.
    */
   public static void bind(Object target, View source) {
-    bind(target, source, Finder.VIEW);
+    bind(target, source, Util.Finder.VIEW);
   }
 
   /**
@@ -296,7 +166,7 @@ public final class ButterKnife {
    * @param source Dialog on which IDs will be looked up.
    */
   public static void bind(Object target, Dialog source) {
-    bind(target, source, Finder.DIALOG);
+    bind(target, source, Util.Finder.DIALOG);
   }
 
   /**
@@ -310,7 +180,7 @@ public final class ButterKnife {
     Class<?> targetClass = target.getClass();
     try {
       if (debug) Log.d(TAG, "Looking up view binder for " + targetClass.getName());
-      ViewBinder<Object> viewBinder = findViewBinderForClass(targetClass);
+      Util.ViewBinder<Object> viewBinder = findViewBinderForClass(targetClass);
       if (viewBinder != null) {
         viewBinder.unbind(target);
       }
@@ -319,11 +189,11 @@ public final class ButterKnife {
     }
   }
 
-  static void bind(Object target, Object source, Finder finder) {
+  static void bind(Object target, Object source, Util.Finder finder) {
     Class<?> targetClass = target.getClass();
     try {
       if (debug) Log.d(TAG, "Looking up view binder for " + targetClass.getName());
-      ViewBinder<Object> viewBinder = findViewBinderForClass(targetClass);
+      Util.ViewBinder<Object> viewBinder = findViewBinderForClass(targetClass);
       if (viewBinder != null) {
         viewBinder.bind(finder, target, source);
       }
@@ -332,9 +202,9 @@ public final class ButterKnife {
     }
   }
 
-  private static ViewBinder<Object> findViewBinderForClass(Class<?> cls)
+  private static Util.ViewBinder<Object> findViewBinderForClass(Class<?> cls)
       throws IllegalAccessException, InstantiationException {
-    ViewBinder<Object> viewBinder = BINDERS.get(cls);
+    Util.ViewBinder<Object> viewBinder = BINDERS.get(cls);
     if (viewBinder != null) {
       if (debug) Log.d(TAG, "HIT: Cached in view binder map.");
       return viewBinder;
@@ -347,7 +217,7 @@ public final class ButterKnife {
     try {
       Class<?> viewBindingClass = Class.forName(clsName + "$$ViewBinder");
       //noinspection unchecked
-      viewBinder = (ViewBinder<Object>) viewBindingClass.newInstance();
+      viewBinder = (Util.ViewBinder<Object>) viewBindingClass.newInstance();
       if (debug) Log.d(TAG, "HIT: Loaded view binder class.");
     } catch (ClassNotFoundException e) {
       if (debug) Log.d(TAG, "Not found. Trying superclass " + cls.getSuperclass().getName());
